@@ -2,6 +2,7 @@ from datetime import date, datetime, timedelta
 import math
 from wechatpy import WeChatClient, WeChatClientException
 from wechatpy.client.api import WeChatMessage
+from requests import get
 import requests
 import os
 import random
@@ -66,6 +67,23 @@ def get_words():
     return get_words()
   return words.json()['data']['text']
 
+def get_ciba():
+    if (1):
+        try:
+            url = "http://open.iciba.com/dsapi/"
+            headers = {
+                'Content-Type': 'application/json',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                            'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
+            }
+            r = get(url, headers=headers)
+            note_en = r.json()["content"]
+            note_ch = r.json()["note"]
+            return (note_en,note_ch)
+        except:
+            return ("词霸API调取错误")
+
+
 def format_temperature(temperature):
   return math.floor(temperature)
 
@@ -81,10 +99,19 @@ except WeChatClientException as e:
 
 wm = WeChatMessage(client)
 weather = get_weather()
+note_ch, note_en = get_ciba()
 if weather is None:
   print('获取天气失败')
   exit(422)
 data = {
+"note_en": {
+"value": note_en,
+"color": get_random_color()
+  },
+ "note_ch": {
+ "value": note_ch,
+ "color": get_random_color()
+  },
   "city": {
     "value": city,
     "color": get_random_color()
@@ -93,8 +120,36 @@ data = {
     "value": today.strftime('%Y年%m月%d日'),
     "color": get_random_color()
   },
+  "lastUpdateTime": {
+    "value": weather['lastUpdateTime'],
+    "color": get_random_color()
+  },
+  "humidity": {
+    "value": weather['humidity'],
+    "color": get_random_color()
+  },
   "weather": {
     "value": weather['weather'],
+    "color": get_random_color()
+  },
+  "wind": {
+    "value": weather['wind'],
+    "color": get_random_color()
+  },
+  "pm25": {
+    "value": math.floor(weather['pm25']),
+    "color": get_random_color()
+  },
+  "pm10": {
+    "value": math.floor(weather['pm10']),
+    "color": get_random_color()
+  },
+  "airData": {
+    "value": weather['airData'],
+    "color": get_random_color()
+  },
+  "airQuality": {
+    "value": weather['airQuality'],
     "color": get_random_color()
   },
   "temperature": {
